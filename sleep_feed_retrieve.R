@@ -44,19 +44,20 @@ data_collated <- data_raw[c(1,5,10)]
 
 ## Add data to spreadsheet
 old_data_path <- "C://Users//Keiran//Desktop//RLO sleep log//RLO_sleep_log.csv"
-old_data <- import(old_data_path)
+old_data <- read.csv(old_data_path)
 
 ## Remove duplicate entries to avoid fencepost errors (based on duplicate IDs)
 if (old_data$id[1] == data_collated$id[length(data_collated$id)]){
+  data_collated[length(data_collated$id),] <- NA
   data_collated <- data_collated[1:(length(data_collated$id)-1),]
 }
 
 ## append cdataframe on to spreadsheet
-combined_data <- rbind(data_collated,old_data)
+combined_data <- na.omit(rbind(data_collated,old_data))
 
 
 ## export/save
-write.csv(combined_data, file=old_data_path)
+write.csv(combined_data, file=old_data_path, row.names=FALSE)
 
 ## Capture latest timestamp
 new_timestamp <- data_raw$created_at[1] ## New entries are at the top of the list, not the bottom
@@ -65,12 +66,27 @@ new_timestamp <- data_raw$created_at[1] ## New entries are at the top of the lis
 write_file(new_timestamp,timestamp_file_path, append=FALSE)
 
 ## calculate stats about sleep period
-
-number_of_awakes <- length(data_collated$id)
 time_between_wakes <- c()
-  ## Average time between wakes
-  ## Median time between wakes
+number_of_wakes <- length(na.omit(data_collated$id))
+
+for (i in 2:number_of_wakes){
+  time_between_wakes[i-1] <- data_collated$created_epoch[i-1]-data_collated$created_epoch[i]
+}
+
+average_today <- mean(time_between_wakes)
+median_today <- median(time_between_wakes)
+
+if (number_of_wakes==0){
+  average_today <- "No wakes last night!"
+  median_today <- "No wakes last night!"
+}
+  
 
 ## Generate chart
 
+## first coerce all dates to common format
+list_of_dates <- as.Date(as.POSIXct(as.numeric(combined_data$created_epoch), origin="1970-01-01"))
+histogram <- hist(list_of_dates, breaks="days")
+
 ## Compose and send email
+## all of the paste functions
