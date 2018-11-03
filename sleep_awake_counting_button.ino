@@ -212,9 +212,9 @@ void loop() {
     }  
   }
 
-  //If first time running, turn LED blue to indicate ready status
+  //If first time running, turn LED off to indicate ready status
   if (times_run == 0){
-    rgbLed.writeRGB(0,0,255);
+    rgbLed.writeRGB(0,0,0);
   }
   
   if (flag == 1){
