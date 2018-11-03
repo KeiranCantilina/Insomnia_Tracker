@@ -1,4 +1,4 @@
-# Insomnia_Tracker
+# Insomnia Tracker
 Bedside button that you push when you can't sleep. Timestamps of button presses are sent to Adafruit.io via MQTT, and the data is downloaded and processed using R to send a daily sleep summary email.
 If you can't sleep, you might as well collect data!
 
