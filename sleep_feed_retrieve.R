@@ -37,16 +37,26 @@ if (is.na(timestamp) == FALSE){
 URL <- paste("https://io.adafruit.com/api/v2/Keirancantilina/feeds/keiran-block/data", na.omit(start_time_query), na.omit(timestamp), ".json", sep="")
 data_raw <-import(URL, format="json")
 
-## Parse data and collate
-  ## make new dataframe
-  ## add relevant columns from the raw data to the new dataframe (omitting last row of raw data to prevent duplicates)
+
+## Discard unused columns
+data_collated <- data_raw[c(1,5,10)]
 
 
 ## Add data to spreadsheet
-  ## import spreadsheet
-  ## append dataframe on to spreadsheet
-  ## export/save
+old_data_path <- "C://Users//Keiran//Desktop//RLO sleep log//RLO_sleep_log.csv"
+old_data <- import(old_data_path)
 
+## Remove duplicate entries to avoid fencepost errors (based on duplicate IDs)
+if (old_data$id[1] == data_collated$id[length(data_collated$id)]){
+  data_collated <- data_collated[1:(length(data_collated$id)-1),]
+}
+
+## append cdataframe on to spreadsheet
+combined_data <- rbind(data_collated,old_data)
+
+
+## export/save
+write.csv(combined_data, file=old_data_path)
 
 ## Capture latest timestamp
 new_timestamp <- data_raw$created_at[1] ## New entries are at the top of the list, not the bottom
@@ -55,7 +65,9 @@ new_timestamp <- data_raw$created_at[1] ## New entries are at the top of the lis
 write_file(new_timestamp,timestamp_file_path, append=FALSE)
 
 ## calculate stats about sleep period
-  ## Number of awakes
+
+number_of_awakes <- length(data_collated$id)
+time_between_wakes <- c()
   ## Average time between wakes
   ## Median time between wakes
 
